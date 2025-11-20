@@ -17,8 +17,8 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     lastName: {
-      stype: String,
-      required: trued,
+      type: String,
+      required: true,
     },
     profileImage: {
       type: String,

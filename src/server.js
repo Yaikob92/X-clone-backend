@@ -1,13 +1,22 @@
 import express from "express";
 import { ENV } from "./config/env.js";
-import { connect } from "mongoose";
 import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/user.route.js";
+import cors from "cors";
+import { clerkMiddleware } from "@clerk/express";
 
 const app = express();
+
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(clerkMiddleware());
 
 app.get("/", (req, res) => {
   res.send("Hello from server");
 });
+
+app.use("api/users", userRoutes);
 
 const startServer = async () => {
   try {
