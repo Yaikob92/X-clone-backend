@@ -1,7 +1,7 @@
 import { getAuth } from "@clerk/express";
 import asyncHandler from "express-async-handler";
-import Post from "../models/post.model";
-import User from "../models/user.model";
+import Post from "../models/post.model.js";
+import User from "../models/user.model.js";
 
 export const getComment = asyncHandler(async (req, res) => {
   const { postId } = getAuth(req);
@@ -18,6 +18,9 @@ export const createComment = asyncHandler(async (req, res) => {
   const { postId } = req.params;
   const { content } = req.body;
 
+  const session = await mongoose.startSession();
+  let comment;
+
   if (!content || content.trim() === "") {
     return res.status(400).json({ error: "Comment is required" });
   }
@@ -28,11 +31,20 @@ export const createComment = asyncHandler(async (req, res) => {
   if (!user || !post)
     return res.status(404).json({ error: "User or post not found" });
 
-  const comment = Comment.creat({
-    user: user._id,
-    post: postId,
-    content,
-  });
+  try {
+    await session.withTransaction(
+      async () => {
+        const comment = Comment.creat({
+          user: user._id,
+          post: postId,
+          content,
+        });
+      },
+      { session }
+    );
+  } finally {
+    await session.endSession();
+  }
 
   //   link the comment to the post
 
@@ -71,9 +83,16 @@ export const deleteComment = asyncHandler(async (req, res) => {
   }
 
   //   remove comment from post
-  await Post.findByIdAndDelete(comment.post, {
-    $pull: { comments: commentId },
-  });
+  await Post.findByIdAndDelete(
+    comment.post,
+    {
+      $pull: { comments: commentId },
+    },
+    { new: true }
+  );
+
+  //   remove related notification
+  await Notification.deleteMany({ comment: commentId });
 
   //   delete the comment
   await Comment.findByIdAndDelete(commentId);

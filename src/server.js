@@ -4,15 +4,19 @@ import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
 import postRoutes from "./routes/post.route.js";
 import commentRoutes from "./routes/comment.routes.js";
+import notificationRoutes from "./routes/comment.routes.js";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
+import { arcjetMiddleware } from "./middleware/arcjet.middleware.js";
 
 const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
 app.use(clerkMiddleware());
+app.use(arcjetMiddleware);
 
 app.get("/", (req, res) => {
   res.send("Hello from server");
@@ -21,6 +25,7 @@ app.get("/", (req, res) => {
 app.use("api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // error handling middleware
 app.use((err, req, res, next) => {
