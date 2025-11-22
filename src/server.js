@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(clerkMiddleware());
-app.use(arcjetMiddleware);
+app.use("api/", arcjetMiddleware);
 
 app.get("/", (req, res) => {
   res.send("Hello from server");
@@ -30,7 +30,7 @@ app.use("/api/notifications", notificationRoutes);
 // error handling middleware
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
-  res.status(500).json({ error: erro.message || "Internal server error" });
+  res.status(500).json({ error: err.message || "Internal server error" });
 });
 
 const startServer = async () => {
