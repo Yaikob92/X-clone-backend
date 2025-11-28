@@ -63,7 +63,7 @@ export const createPost = asyncHandler(async (req, res) => {
   if (!content && !imageFile) {
     return res
       .status(400)
-      .json({ error: "Post must contain either text or image" });
+      .json({ error: "Post must contain both text and image" });
   }
 
   const user = await User.findOne({ clerkId: userId });
@@ -79,18 +79,15 @@ export const createPost = asyncHandler(async (req, res) => {
         imageFile.mimetype
       };base64,${imageFile.buffer.toString("base64")}`;
 
-      const uploadResponse = await cloudinary.uploader.uploader.upload(
-        base64Image,
-        {
-          folder: "social_media_posts",
-          resource_type: "image",
-          transformation: [
-            { width: 800, height: 600, crop: "limit" },
-            { quality: "auto" },
-            { format: "auto" },
-          ],
-        }
-      );
+      const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+        folder: "social_media_posts",
+        resource_type: "image",
+        transformation: [
+          { width: 800, height: 600, crop: "limit" },
+          { quality: "auto" },
+          { format: "auto" },
+        ],
+      });
       imageUrl = uploadResponse.secure_url;
     } catch (error) {
       console.error("Cloudinary upload error:", uploadError);

@@ -17,18 +17,18 @@ export const getNotification = aysncHandler(async (req, res) => {
     .populate("post", "content image")
     .populate("comment", "content");
 
-  res.status(200).json({ notifications });
+  res.status(200).json({ notification });
 });
 
 export const deleteNotification = aysncHandler(async (req, res) => {
   const { userId } = getAuth(req);
-  const { notificatonId } = req.params;
+  const { notificationId } = req.params;
 
   const user = await User.findOne({ clerkId: userId });
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  const notification = await Notification.findAndDelete({
-    _id: notificaation._id,
+  const notification = await Notification.findByIdAndDelete({
+    _id: notificationId,
     to: user._id,
   });
 
