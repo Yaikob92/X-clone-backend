@@ -25,6 +25,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const syncUser = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
 
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
   // check if user already exists in db
   const existingUser = await User.findOne({ clerkId: userId });
   if (existingUser) {
