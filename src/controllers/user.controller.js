@@ -26,6 +26,7 @@ export const syncUser = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
 
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
   // check if user already exists in db
   const existingUser = await User.findOne({ clerkId: userId });
   if (existingUser) {
@@ -43,7 +44,8 @@ export const syncUser = asyncHandler(async (req, res) => {
     email: clerkUser.emailAddresses[0].emailAddress,
     firstName: clerkUser.firstName || "",
     lastName: clerkUser.lastName || "",
-    username: clerkUser.emailAddresses[0].emailAddress.split("@")[0],
+    username:
+      clerkUser.emailAddresses[0].emailAddress.split("@")[0] + "_" + Date.now(),
     profilePicture: clerkUser.imageUrl || "",
   };
 
