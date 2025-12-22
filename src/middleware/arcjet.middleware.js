@@ -29,7 +29,7 @@ export const arcjetMiddleware = async (req, res, next) => {
     // check or spoofed bots
     if (
       decision.results.some(
-        (result) => result.reason.isBot() && result.reason.isSpoofed
+        (result) => result.reason.isBot() && result.reason.isSpoofed()
       )
     ) {
       return res.status(403).json({
@@ -39,7 +39,7 @@ export const arcjetMiddleware = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    console.error("Arcject middleware erro:", error);
+    console.error("Arcjet middleware error:", error);
     // allow request to continue if Arcjet fails
     next();
   }

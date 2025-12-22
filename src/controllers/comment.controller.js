@@ -3,6 +3,8 @@ import asyncHandler from "express-async-handler";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import Comment from "../models/comment.model.js";
+import Notification from "../models/notification.model.js";
+import mongoose from "mongoose";
 
 export const getComment = asyncHandler(async (req, res) => {
   const { postId } = req.params;
@@ -82,11 +84,11 @@ export const deleteComment = asyncHandler(async (req, res) => {
   if (comment.user.toString() !== user._id.toString()) {
     return res
       .status(403)
-      .json({ error: "You can only delete you own comments" });
+      .json({ error: "You can only delete your own comments" });
   }
 
   //   remove comment from post
-  await Post.findByIdAndDelete(comment.post, {
+  await Post.findByIdAndUpdate(comment.post, {
     $pull: { comments: commentId },
   });
 
@@ -96,5 +98,5 @@ export const deleteComment = asyncHandler(async (req, res) => {
   //   delete the comment
   await Comment.findByIdAndDelete(commentId);
 
-  res.status(200).json({ message: "Comment deleted succesfully" });
+  res.status(200).json({ message: "Comment deleted successfully" });
 });

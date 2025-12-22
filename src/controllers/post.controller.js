@@ -29,7 +29,7 @@ export const getPost = asyncHandler(async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username firstName lastName  profilePicture",
+        select: "username firstName lastName profilePicture",
       },
     });
 
@@ -50,9 +50,11 @@ export const getUserPost = asyncHandler(async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username firstName lastName  profilePicture",
+        select: "username firstName lastName profilePicture",
       },
     });
+
+  res.status(200).json({ posts });
 });
 
 export const createPost = asyncHandler(async (req, res) => {
@@ -63,7 +65,7 @@ export const createPost = asyncHandler(async (req, res) => {
   if (!content && !imageFile) {
     return res
       .status(400)
-      .json({ error: "Post must contain both text and image" });
+      .json({ error: "Post must contain either text or image" });
   }
 
   const user = await User.findOne({ clerkId: userId });
@@ -75,9 +77,8 @@ export const createPost = asyncHandler(async (req, res) => {
   if (imageFile) {
     try {
       // convert buffer to base64 for cloudinary
-      const base64Image = `data:${
-        imageFile.mimetype
-      };base64,${imageFile.buffer.toString("base64")}`;
+      const base64Image = `data:${imageFile.mimetype
+        };base64,${imageFile.buffer.toString("base64")}`;
 
       const uploadResponse = await cloudinary.uploader.upload(base64Image, {
         folder: "social_media_posts",
@@ -90,8 +91,8 @@ export const createPost = asyncHandler(async (req, res) => {
       });
       imageUrl = uploadResponse.secure_url;
     } catch (error) {
-      console.error("Cloudinary upload error:", uploadError);
-      return res.status(400).json({ erro: "Failed to upload image" });
+      console.error("Cloudinary upload error:", error);
+      return res.status(400).json({ error: "Failed to upload image" });
     }
   }
   const post = await Post.create({
@@ -141,7 +142,7 @@ export const likePost = asyncHandler(async (req, res) => {
 
 export const deletePost = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
-  const { postId } = Post.req.params;
+  const { postId } = req.params;
 
   const user = await User.findOne({ clerkId: userId });
   const post = await Post.findById(postId);
@@ -150,7 +151,7 @@ export const deletePost = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "User or post not found" });
 
   if (post.user.toString() !== user._id.toString()) {
-    return res.status(403).json({ error: "You can only delete you own posts" });
+    return res.status(403).json({ error: "You can only delete your own posts" });
   }
   // delete all comments on this posts
   await Comment.deleteMany({ post: postId });
