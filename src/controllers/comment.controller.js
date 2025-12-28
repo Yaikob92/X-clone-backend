@@ -36,7 +36,7 @@ export const createComment = asyncHandler(async (req, res) => {
 
   try {
     await session.withTransaction(async () => {
-      comment = await Comment.create(
+      const results = await Comment.create(
         [
           {
             user: user._id,
@@ -46,6 +46,7 @@ export const createComment = asyncHandler(async (req, res) => {
         ],
         { session }
       );
+      comment = results[0];
     });
   } finally {
     await session.endSession();
